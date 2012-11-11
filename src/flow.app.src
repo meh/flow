@@ -1,0 +1,15 @@
+{application, flow,
+ [
+  {description, "Because it's never too late."},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  mnesia,
+                  misultin,
+                  booerlang
+                 ]},
+  {mod, { flow_app, []}},
+  {env, []}
+ ]}.
