@@ -171,7 +171,7 @@ floats_to_matchspec(Floats) ->
   [{#flow_float{name = '$1', attributes = '_', flows = '_'}, [],
     [floats_to_matchspec(Floats, inside)]}].
 
-floats_to_matchspec([First | [Second | []]], inside) ->
+floats_to_matchspec([First, Second | []], inside) ->
   {'orelse', {'==', '$1', First}, {'==', '$1', Second}};
 
 floats_to_matchspec([First | Rest], inside) ->
