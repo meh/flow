@@ -99,10 +99,10 @@ create_flow(Title, Drop, Floats) ->
   end,
 
   mnesia:transaction(fun() ->
-        Flow = #flow_flow{ id = auto_increment(flow_flow), title = Title, floats = Floats, drop = Id },
-        mnesia:write(Flow),
-        add_floats(Flow#flow_flow.id, Floats),
-        Flow
+        NewFlow = #flow_flow{ id = auto_increment(flow_flow), title = Title, drop = Id },
+        mnesia:write(NewFlow),
+
+        {atomic, Flow} = add_floats(NewFlow#flow_flow.id, Floats), Flow
     end).
 
 find_flow(Id) ->
