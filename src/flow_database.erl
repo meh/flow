@@ -21,7 +21,7 @@
 -export([create_float/1, create_float/2, find_float/1, find_or_create_float/1]).
 -export([create_drop/1, create_drop/2]).
 -export([create_flow/3, find_flow/1, add_floats/2, delete_floats/2, find_flows/1]).
--export([create_moderator/1, delete_moderator/1]).
+-export([create_moderator/1, delete_moderator/1, is_moderator/1]).
 
 -record(flow_id, {type, id}).
 -record(flow_float, {name, attributes = [], flows = []}).
@@ -202,6 +202,17 @@ delete_moderator(Email) ->
         mnesia:delete({flow_moderator, Email})
     end).
 
+is_moderator(What) ->
+  case mnesia:transaction(fun() ->
+          mnesia:match_object(case What of
+              {token, Token} -> #flow_moderator{email = '_', token = Token};
+              {email, Email} -> #flow_moderator{email = Email, token = '_'}
+            end)
+      end) of
+    {atomic, [_]} -> true;
+    {atomic, []}  -> false
+  end.
+
 generate_token() ->
   AllowedChars = "abcdefghijklmnopqrstuvwxyz0123456789",
   Length       = 32,
@@ -209,12 +220,7 @@ generate_token() ->
         [lists:nth(random:uniform(length(AllowedChars)), AllowedChars) | Acc]
     end, [], lists:seq(1, Length)),
 
-  generate_token(Token, case mnesia:transaction(fun() ->
-          mnesia:match_object(#flow_moderator{email = '_', token = Token})
-        end) of
-      {atomic, [Token]} -> false;
-      {atomic, []}      -> true
-    end).
+  generate_token(Token, not is_moderator({token, Token})).
 
 generate_token(_, false) ->
   generate_token();
