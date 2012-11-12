@@ -236,11 +236,15 @@ is_moderator(What) ->
   end.
 
 generate_token() ->
-  AllowedChars = "abcdefghijklmnopqrstuvwxyz0123456789",
-  Length       = 32,
-  Token        = [lists:nth(random:uniform(length(AllowedChars)), AllowedChars) || _ <- lists:seq(1, Length)],
+  generate_token(32).
+
+generate_token(Length) ->
+  generate_token(Length, "abcdefghijklmnopqrstuvwxyz0123456789").
+
+generate_token(Length, AllowedChars) ->
+  Token = [lists:nth(random:uniform(length(AllowedChars)), AllowedChars) || _ <- lists:seq(1, Length)],
 
   case is_moderator({token, Token}) of
     false -> Token;
-    true  -> generate_token()
+    true  -> generate_token(Length, AllowedChars)
   end.
