@@ -126,14 +126,6 @@ create_flow(Title, Drop, Floats) ->
         {atomic, Flow} = add_floats(NewFlow#flow_flow.id, Floats), Flow
     end).
 
-find_flow(Id) ->
-  mnesia:transaction(fun() ->
-        case mnesia:wread({flow_flow, Id}) of
-          [Flow] -> Flow;
-          _      -> undefined
-        end
-    end).
-
 add_floats(Id, Floats) ->
   mnesia:transaction(fun() ->
         [Flow] = mnesia:wread({flow_flow, Id}),
@@ -180,9 +172,16 @@ delete_floats(Id, Floats) ->
         end
     end).
 
-find_flows(Expression) ->
-  MatchSpec = floats_to_matchspec(boolean_lexer:elements(Expression)),
+find_flow(Id) ->
+  mnesia:transaction(fun() ->
+        case mnesia:wread({flow_flow, Id}) of
+          [Flow] -> Flow;
+          _      -> undefined
+        end
+    end).
 
+find_flows(Expression) ->
+  MatchSpec        = floats_to_matchspec(boolean_lexer:elements(Expression)),
   {atomic, Floats} = mnesia:transaction(fun() ->
         mnesia:select(flow_floats, MatchSpec)
     end),
