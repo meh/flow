@@ -216,14 +216,9 @@ is_moderator(What) ->
 generate_token() ->
   AllowedChars = "abcdefghijklmnopqrstuvwxyz0123456789",
   Length       = 32,
-  Token        = lists:foldl(fun(_, Acc) ->
-        [lists:nth(random:uniform(length(AllowedChars)), AllowedChars) | Acc]
-    end, [], lists:seq(1, Length)),
+  Token        = [lists:nth(random:uniform(length(AllowedChars)), AllowedChars) || _ <- lists:seq(1, Length)],
 
-  generate_token(Token, not is_moderator({token, Token})).
-
-generate_token(_, false) ->
-  generate_token();
-
-generate_token(Token, true) ->
-  Token.
+  case is_moderator({token, Token}) of
+    false -> Token;
+    true  -> generate_token()
+  end.
