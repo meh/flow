@@ -30,7 +30,11 @@
 -record(flow_moderator, {email, token}).
 
 install(Nodes) ->
-  ok = mnesia:create_schema(Nodes),
+  case mnesia:create_schema(Nodes) of
+    ok                                -> ok;
+    {error, {_, {already_exists, _}}} -> ok
+  end,
+
   ok = mnesia:start(),
 
   {_, ok} = mnesia:create_table(flow_id,
@@ -47,6 +51,11 @@ install(Nodes) ->
 
   {_, ok} = mnesia:create_table(flow_flow,
                       [{attributes, record_info(fields, flow_flow)},
+                       {disc_copies, Nodes}]),
+
+  {_, ok} = mnesia:create_table(flow_moderator,
+                      [{attributes, record_info(fields, flow_moderator)},
+                       {index, [#flow_moderator.token]},
                        {disc_copies, Nodes}]),
 
   stopped = mnesia:stop(), ok.
@@ -94,8 +103,9 @@ create_flow(_, _, []) ->
   {aborted, no_floats};
 
 create_flow(Title, Drop, Floats) ->
-  Id = if is_list(Drop) -> {atomic, Created} = create_drop(Drop), Created#flow_drop.id;
-    true -> Drop
+  Id = case is_list(Drop) of
+    true  -> {atomic, Created} = create_drop(Drop), Created#flow_drop.id;
+    false -> Drop
   end,
 
   mnesia:transaction(fun() ->
@@ -120,9 +130,9 @@ add_floats(Id, Floats) ->
                 not lists:member(Elem, Flow#flow_flow.floats)
             end, lists:usort(Floats)),
 
-        if
-          length(MissingFloats) == 0 -> Flow;
-          true ->
+        case length(MissingFloats) of
+          0 -> Flow;
+          _ ->
             lists:foreach(fun(Name) ->
                   {atomic, Float} = find_or_create_float(Name),
                   mnesia:write(Float#flow_float{flows = [Id | Float#flow_float.flows]})
@@ -137,14 +147,15 @@ add_floats(Id, Floats) ->
 delete_floats(Id, Floats) ->
   mnesia:transaction(fun() ->
         {atomic, Flow} = find_flow(Id),
+        Length = length(Flow#flow_flow.floats),
         PresentFloats = lists:filter(fun(Elem) ->
                 lists:member(Elem, Flow#flow_flow.floats)
             end, lists:usort(Floats)),
 
-        if
-          length(PresentFloats) == length(Flow#flow_flow.floats) -> mnesia:abort(no_floats);
-          length(PresentFloats) == 0 -> Flow;
-          true ->
+        case length(PresentFloats) of
+          Length -> mnesia:abort(no_floats);
+          0 -> Flow;
+          _ ->
             lists:foreach(fun(Name) ->
                   {atomic, Float} = find_float(Name),
                   mnesia:write(Float#flow_float{ flows = lists:delete(Id, Float#flow_float.flows) })
