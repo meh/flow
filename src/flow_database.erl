@@ -189,12 +189,12 @@ find_flows(Expression) ->
   filter_flows(Expression, Floats).
 
 floats_to_matchspec([Float]) ->
-  [{#flow_float{name = '$1', attributes = '_', flows = '_'},
-    [{'==', '$1', Float}], ['$_']}];
+  [{#flow_float{name = '$1', attributes = '_', flows = '$2'},
+    [{'==', '$1', Float}], [{{'$1', '$2'}}]}];
 
 floats_to_matchspec(Floats) ->
-  [{#flow_float{name = '$1', attributes = '_', flows = '_'},
-    [floats_to_matchspec(Floats, inside)], ['$_']}].
+  [{#flow_float{name = '$1', attributes = '_', flows = '$2'},
+    [floats_to_matchspec(Floats, inside)], [{{'$1', '$2'}}]}].
 
 floats_to_matchspec([First, Second | []], inside) ->
   {'orelse', {'==', '$1', First}, {'==', '$1', Second}};
