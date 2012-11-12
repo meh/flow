@@ -186,7 +186,7 @@ find_flows(Expression) ->
         mnesia:select(flow_float, MatchSpec)
     end),
 
-  filter_flows(Expression, Floats).
+  filter_flows(Expression, dict:from_list(Floats)).
 
 floats_to_matchspec([Float]) ->
   [{#flow_float{name = '$1', attributes = '_', flows = '$2'},
@@ -204,7 +204,7 @@ floats_to_matchspec([First | Rest], inside) ->
 
 filter_flows(Expression, Floats) ->
   filter_flows(boolean_parser:parse(boolean_lexer:string(Expression)), Floats,
-               lists:usort(lists:foldl(fun(Float, Acc) -> Float#flow_float.flows ++ Acc end, Floats))).
+               lists:usort(dict:foldl(fun(_, Value, Acc) -> Value ++ Acc end, Floats))).
 
 filter_flows(Expression, Floats, Flows) ->
   [Expression, Floats, Flows].
