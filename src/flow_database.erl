@@ -188,7 +188,7 @@ filter_flows(Expression, Floats, Flows) ->
 
 create_moderator(Email) ->
   mnesia:transaction(fun() ->
-        case mnesia:read({flow_moderators, Email}) of
+        case mnesia:read({flow_moderator, Email}) of
           [Moderator] -> Moderator;
           _ ->
             Moderator = #flow_moderator{email = Email, token = generate_token()},
@@ -205,7 +205,19 @@ delete_moderator(Email) ->
 generate_token() ->
   AllowedChars = "abcdefghijklmnopqrstuvwxyz0123456789",
   Length       = 32,
-
-  lists:foldl(fun(_, Acc) ->
+  Token        = lists:foldl(fun(_, Acc) ->
         [lists:nth(random:uniform(length(AllowedChars)), AllowedChars) | Acc]
-    end, [], lists:seq(1, Length)).
+    end, [], lists:seq(1, Length)),
+
+  generate_token(Token, case mnesia:transaction(fun() ->
+          mnesia:match_object(#flow_moderator{email = '_', token = Token})
+        end) of
+      {atomic, [Token]} -> false;
+      {atomic, []}      -> true
+    end).
+
+generate_token(_, false) ->
+  generate_token();
+
+generate_token(Token, true) ->
+  Token.
