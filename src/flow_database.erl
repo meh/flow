@@ -17,7 +17,7 @@
 
 -module(flow_database).
 
--export([install/1]).
+-export([install/1, uninstall/0]).
 -export([create_float/1, create_float/2, find_float/1, find_or_create_float/1]).
 -export([create_drop/1, create_drop/2]).
 -export([create_flow/3, find_flow/1, add_floats/2, delete_floats/2, find_flows/1]).
@@ -57,6 +57,17 @@ install(Nodes) ->
                       [{attributes, record_info(fields, flow_moderator)},
                        {index, [#flow_moderator.token]},
                        {disc_copies, Nodes}]),
+
+  stopped = mnesia:stop(), ok.
+
+uninstall() ->
+  ok = mnesia:start(),
+
+  mnesia:delete_table(flow_id),
+  mnesia:delete_table(flow_float),
+  mnesia:delete_table(flow_drop),
+  mnesia:delete_table(flow_flow),
+  mnesia:delete_table(flow_moderator),
 
   stopped = mnesia:stop(), ok.
 
