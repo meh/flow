@@ -242,10 +242,10 @@ generate_token() ->
 generate_token(Length) ->
   generate_token(Length, "abcdefghijklmnopqrstuvwxyz0123456789").
 
-generate_token(Length, AllowedChars) ->
-  Token = [lists:nth(random:uniform(length(AllowedChars)), AllowedChars) || _ <- lists:seq(1, Length)],
+generate_token(Length, Charset) ->
+  Token = [lists:nth(random:uniform(length(Charset)), Charset) || _ <- lists:seq(1, Length)],
 
   case is_moderator({token, Token}) of
     false -> Token;
-    true  -> generate_token(Length, AllowedChars)
+    true  -> generate_token(Length, Charset)
   end.
