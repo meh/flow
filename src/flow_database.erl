@@ -161,7 +161,7 @@ delete_floats(Id, Floats) ->
           _ ->
             lists:foreach(fun(Name) ->
                   {atomic, Float} = find_float(Name),
-                  mnesia:write(Float#flow_float{ flows = lists:delete(Id, Float#flow_float.flows) })
+                  mnesia:write(Float#flow_float{flows = lists:delete(Id, Float#flow_float.flows)})
               end, PresentFloats),
 
             NewFlow = Flow#flow_flow{ floats = lists:filter(fun(Float) ->
