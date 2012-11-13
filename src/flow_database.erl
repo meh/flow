@@ -81,14 +81,14 @@ create_float(Name) ->
 
 create_float(Name, Attributes) ->
   mnesia:transaction(fun() ->
-        Float = #flow_float{ name = Name, attributes = Attributes },
+        Float = #flow_float{ name = boolean_parser:normalize(Name), attributes = Attributes },
         mnesia:write(Float),
         Float
     end).
 
 find_float(Name) ->
   mnesia:transaction(fun() ->
-        case mnesia:wread({flow_float, Name}) of
+        case mnesia:wread({flow_float, boolean_parser:normalize(Name)}) of
           [Float] -> Float;
           _       -> undefined
         end
@@ -138,12 +138,11 @@ add_floats(Id, Floats) ->
         case length(MissingFloats) of
           0 -> Flow;
           _ ->
-            lists:foreach(fun(Name) ->
-                  {atomic, Float} = find_or_create_float(Name),
-                  mnesia:write(Float#flow_float{flows = [Id | Float#flow_float.flows]})
-              end, MissingFloats),
-
-            NewFlow = Flow#flow_flow{ floats = Flow#flow_flow.floats ++ MissingFloats },
+            NewFlow = Flow#flow_flow{ floats = Flow#flow_flow.floats ++ lists:map(fun(Name) ->
+                      {atomic, Float} = find_or_create_float(Name),
+                      mnesia:write(Float#flow_float{flows = [Id | Float#flow_float.flows]}),
+                      Float#flow_float.name
+                  end, MissingFloats)},
             mnesia:write(NewFlow),
             NewFlow
         end
@@ -183,7 +182,7 @@ find_flow(Id) ->
     end).
 
 find_flows(Expression) ->
-  MatchSpec        = floats_to_matchspec(boolean_lexer:elements(Expression)),
+  MatchSpec        = floats_to_matchspec(boolean_parser:elements(Expression)),
   {atomic, Floats} = mnesia:transaction(fun() ->
         mnesia:select(flow_float, MatchSpec)
     end),
@@ -205,7 +204,7 @@ floats_to_matchspec([First | Rest], inside) ->
   {'orelse', {'==', '$1', First}, floats_to_matchspec(Rest, inside)}.
 
 filter_flows(Expression, Floats) ->
-  {ok, ParsedExpression} = boolean_parser:parse(element(2, boolean_lexer:string(Expression))),
+  {ok, ParsedExpression} = boolean_parser:expression(Expression),
   Flows                  = lists:usort(dict:fold(fun(_, Value, Acc) -> Value ++ Acc end, [], Floats)),
 
   filter_flows(ParsedExpression, Floats, Flows).

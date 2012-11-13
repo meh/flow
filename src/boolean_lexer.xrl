@@ -32,13 +32,3 @@ Rules.
 {WS}+   : skip_token.
 
 Erlang code.
-
--export([elements/1]).
-
-elements(Expression) ->
-  {ok, Tokens, _} = string(Expression),
-
-  lists:usort(lists:map(fun(Token) ->
-          {tag, _, Element} = Token, Element
-        end, lists:filter(fun(Token) ->
-            element(1, Token) == tag end, Tokens))).

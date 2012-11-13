@@ -21,9 +21,26 @@ expressions -> 'not' expressions : {'not', '$2'}.
 expressions -> expressions 'and' expressions : {'and', '$1', '$3'}.
 expressions -> expressions 'or' expressions : {'or', '$1', '$3'}.
 
-element -> tag : trans('$1').
+element -> tag : normalize(element(3, '$1')).
 
 Erlang code.
 
-trans({tag, _, Tag}) ->
-  Tag.
+-export([normalize/1, expression/1, elements/1]).
+
+% XXX: replace [\-_] with -?
+normalize(String) ->
+  Options = [global, {return, list}, unicode],
+
+  string:to_lower(re:replace(re:replace(String, "(\\A\\s+)|(\\s+\\Z)", "", Options),
+                             "\\s+", " ", Options)).
+
+expression(Expression) ->
+  parse(element(2, boolean_lexer:string(Expression))).
+
+elements(Expression) ->
+  {ok, Tokens, _} = boolean_lexer:string(Expression),
+
+  lists:usort(lists:map(fun(Token) ->
+          {tag, _, Element} = Token, normalize(Element)
+        end, lists:filter(fun(Token) ->
+            element(1, Token) == tag end, Tokens))).
