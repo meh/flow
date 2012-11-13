@@ -25,5 +25,5 @@ element -> tag : trans('$1').
 
 Erlang code.
 
-trans({ tag, _, Tag }) ->
+trans({tag, _, Tag}) ->
   Tag.
