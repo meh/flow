@@ -189,11 +189,11 @@ find_flows(Expression) ->
   filter_flows(Expression, dict:from_list(Floats)).
 
 floats_to_matchspec([Float]) ->
-  [{#flow_float{name = '$1', attributes = '_', flows = '$2'},
+  [{#flow_float{name = '$1', flows = '$2', _ = '_'},
     [{'==', '$1', Float}], [{{'$1', '$2'}}]}];
 
 floats_to_matchspec(Floats) ->
-  [{#flow_float{name = '$1', attributes = '_', flows = '$2'},
+  [{#flow_float{name = '$1', flows = '$2', _ = '_'},
     [floats_to_matchspec(Floats, inside)], [{{'$1', '$2'}}]}].
 
 floats_to_matchspec([First, Second | []], inside) ->
@@ -228,8 +228,8 @@ delete_moderator(Email) ->
 is_moderator(What) ->
   case mnesia:transaction(fun() ->
           mnesia:match_object(case What of
-              {token, Token} -> #flow_moderator{email = '_', token = Token};
-              {email, Email} -> #flow_moderator{email = Email, token = '_'}
+              {token, Token} -> #flow_moderator{token = Token, _ = '_'};
+              {email, Email} -> #flow_moderator{email = Email, _ = '_'}
             end)
       end) of
     {atomic, [_]} -> true;
