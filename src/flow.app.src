@@ -1,15 +1,19 @@
-{application, flow,
- [
+{application, flow, [
   {description, "Because it's never too late."},
-  {vsn, "1"},
+  {vsn, "0.0.1"},
+  {modules, [
+    flow_rest,
+    flow_database,
+    boolean_lexer,
+    boolean_parser
+  ]},
   {registered, []},
+  {env, []},
   {applications, [
-                  kernel,
-                  stdlib,
-                  mnesia,
-                  misultin,
-                  booerlang
-                 ]},
-  {mod, { flow_app, []}},
-  {env, []}
- ]}.
+    kernel,
+    stdlib,
+    mnesia,
+    misultin,
+    rfc4627_jsonrpc
+  ]}
+]}.
