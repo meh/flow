@@ -199,11 +199,28 @@ floats_to_matchspec([First | Rest], inside) ->
   {'orelse', {'==', '$1', First}, floats_to_matchspec(Rest, inside)}.
 
 filter_flows(Expression, Floats) ->
-  filter_flows(boolean_parser:parse(boolean_lexer:string(Expression)), Floats,
-               lists:usort(dict:foldl(fun(_, Value, Acc) -> Value ++ Acc end, Floats))).
+  {ok, ParsedExpression} = boolean_parser:parse(element(2, boolean_lexer:string(Expression))),
+  Flows                  = lists:usort(dict:fold(fun(_, Value, Acc) -> Value ++ Acc end, [], Floats)),
 
-filter_flows(Expression, Floats, Flows) ->
-  [Expression, Floats, Flows].
+  filter_flows(ParsedExpression, Floats, Flows).
+
+filter_flows(ParsedExpression, _, Flows) when is_list(ParsedExpression) ->
+  Flows;
+
+filter_flows(ParsedExpression, Floats, Flows) ->
+  lists:filter(fun(Flow) -> in_expression(Flow, ParsedExpression, Floats) end, Flows).
+
+in_expression(Flow, {'not', What}, Floats) ->
+  not in_expression(Flow, What, Floats);
+
+in_expression(Flow, {'and', Left, Right}, Floats) ->
+  in_expression(Flow, Left, Floats) and in_expression(Flow, Right, Floats);
+
+in_expression(Flow, {'or', Left, Right}, Floats) ->
+  in_expression(Flow, Left, Floats) or in_expression(Flow, Right, Floats);
+
+in_expression(Flow, Term, Floats) when is_list(Term) ->
+  lists:member(Flow, dict:fetch(Term, Floats)).
 
 create_moderator(Email) ->
   mnesia:transaction(fun() ->
