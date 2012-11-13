@@ -41,10 +41,16 @@
     token :: string() }).
 
 -spec flow_database:install(Node :: [node()]) ->
-  ok.
+  'ok'.
+
+-spec flow_database:wait_for_tables() ->
+  'ok' | {'timeout', []} | {'error', any()}.
+
+-spec flow_database:wait_for_tables(Timeout :: timeout()) ->
+  'ok' | {'timeout', []} | {'error', any()}.
 
 -spec flow_database:uninstall() ->
-  ok.
+  'ok'.
 
 -spec flow_database:create_float(Name :: string()) ->
   {'atomic', #flow_float{}} | {'aborted', any()}.
