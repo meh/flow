@@ -26,13 +26,6 @@
 -export([create_moderator/1, delete_moderator/1, is_moderator/1]).
 
 install(Nodes) ->
-  case mnesia:create_schema(Nodes) of
-    ok                                -> ok;
-    {error, {_, {already_exists, _}}} -> ok
-  end,
-
-  ok = mnesia:start(),
-
   {_, ok} = mnesia:create_table(flow_id,
                       [{attributes, record_info(fields, flow_id)},
                        {disc_copies, Nodes}]),
@@ -54,7 +47,7 @@ install(Nodes) ->
                        {index, [#flow_moderator.token]},
                        {disc_copies, Nodes}]),
 
-  stopped = mnesia:stop(), ok.
+  ok.
 
 wait_for_tables() ->
   wait_for_tables(infinity).
@@ -63,15 +56,13 @@ wait_for_tables(Timeout) ->
   mnesia:wait_for_tables([flow_id, flow_float, flow_drop, flow_flow, flow_moderator], Timeout).
 
 uninstall() ->
-  ok = mnesia:start(),
-
   mnesia:delete_table(flow_id),
   mnesia:delete_table(flow_float),
   mnesia:delete_table(flow_drop),
   mnesia:delete_table(flow_flow),
   mnesia:delete_table(flow_moderator),
 
-  stopped = mnesia:stop(), ok.
+  ok.
 
 auto_increment(Name) ->
   mnesia:dirty_update_counter(flow_id, Name, 1).
