@@ -81,8 +81,12 @@ create_float(Name) ->
 
 create_float(Name, Attributes) ->
   mnesia:transaction(fun() ->
-        Float = #flow_float{ name = boolean_parser:normalize(Name), attributes = Attributes },
+        Float = #flow_float{
+            name       = boolean_parser:normalize(Name),
+            attributes = Attributes },
+
         mnesia:write(Float),
+
         Float
     end).
 
@@ -107,8 +111,14 @@ create_drop(Content) ->
 
 create_drop(Parent, Content) ->
   mnesia:transaction(fun() ->
-        Drop = #flow_drop{ id = auto_increment(flow_drop), parent = Parent, content = Content },
+        Drop = #flow_drop{
+            id      = auto_increment(flow_drop),
+            date    = calendar:now_to_universal_time(now()),
+            parent  = Parent,
+            content = Content },
+
         mnesia:write(Drop),
+
         Drop
     end).
 
@@ -122,10 +132,15 @@ create_flow(Title, Drop, Floats) ->
   end,
 
   mnesia:transaction(fun() ->
-        NewFlow = #flow_flow{ id = auto_increment(flow_flow), title = Title, drop = Id },
+        NewFlow = #flow_flow{
+            id    = auto_increment(flow_flow),
+            title = Title,
+            drop  = Id },
+
         mnesia:write(NewFlow),
 
-        {atomic, Flow} = add_floats(NewFlow#flow_flow.id, Floats), Flow
+        {atomic, Flow} = add_floats(NewFlow#flow_flow.id, Floats),
+        Flow
     end).
 
 add_floats(Id, Floats) ->
@@ -190,8 +205,8 @@ find_flows(Expression) ->
   filter_flows(Expression, dict:from_list(Floats)).
 
 floats_to_matchspec([Float]) ->
-  [{#flow_float{name = '$1', flows = '$2', _ = '_'},
-    [{'==', '$1', Float}], [{{'$1', '$2'}}]}];
+  [{#flow_float{name = Float, flows = '$2', _ = '_'},
+    [], [{{Float, '$2'}}]}];
 
 floats_to_matchspec(Floats) ->
   [{#flow_float{name = '$1', flows = '$2', _ = '_'},
@@ -232,8 +247,12 @@ create_moderator(Email) ->
         case mnesia:read({flow_moderator, Email}) of
           [Moderator] -> Moderator;
           _ ->
-            Moderator = #flow_moderator{email = Email, token = generate_token()},
+            Moderator = #flow_moderator{
+                email = Email,
+                token = generate_token() },
+
             mnesia:write(Moderator),
+
             Moderator
         end
     end).

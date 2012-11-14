@@ -26,6 +26,7 @@
 
 -record(flow_drop, {
     id                   :: integer(),
+    date                 :: {{integer(), integer(), integer()}, {integer(), integer(), integer()}},
     content              :: string(),
     parent   = undefined :: 'undefined' | integer(),
     children = []        :: [integer()] }).
