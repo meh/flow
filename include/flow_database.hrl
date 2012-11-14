@@ -71,6 +71,12 @@
 -spec flow_database:create_drop(Parent :: integer(), Content :: string()) ->
   {'atomic', #flow_drop{}} | {'aborted', any()}.
 
+-spec flow_database:find_drop(Id :: integer()) ->
+  {'atomic', #flow_drop{}} | {'aborted', any()}.
+
+-spec flow_databases:find_drops(Ids :: [integer()]) ->
+  {'atomic', [#flow_drop{}]} | {'aborted', any()}.
+
 -spec flow_database:create_flow(Title :: string(), Drop :: integer() | string(), Floats :: [string()]) ->
   {'atomic', #flow_flow{}} | {'aborted', any()}.
 
