@@ -188,26 +188,15 @@ find_flow(Id) ->
     end).
 
 find_flows(Expression) ->
-  MatchSpec        = floats_to_matchspec(boolean_parser:elements(Expression)),
+  MatchSpec = match_all(#flow_float{name = '$1', flows = '$2', _ = '_'},
+                        boolean_parser:elements(Expression), {{'$1', '$2'}}),
+
   {atomic, Floats} = mnesia:transaction(fun() ->
         mnesia:select(flow_float, MatchSpec)
     end),
 
   filter_flows(Expression, dict:from_list(Floats)).
 
-floats_to_matchspec([Float]) ->
-  [{#flow_float{name = Float, flows = '$2', _ = '_'},
-    [], [{{Float, '$2'}}]}];
-
-floats_to_matchspec(Floats) ->
-  [{#flow_float{name = '$1', flows = '$2', _ = '_'},
-    [floats_to_matchspec(Floats, inside)], [{{'$1', '$2'}}]}].
-
-floats_to_matchspec([First, Second | []], inside) ->
-  {'orelse', {'==', '$1', First}, {'==', '$1', Second}};
-
-floats_to_matchspec([First | Rest], inside) ->
-  {'orelse', {'==', '$1', First}, floats_to_matchspec(Rest, inside)}.
 
 filter_flows(Expression, Floats) ->
   {ok, ParsedExpression} = boolean_parser:expression(Expression),
@@ -277,3 +266,15 @@ generate_token(Length, Charset) ->
     false -> Token;
     true  -> generate_token(Length, Charset)
   end.
+
+match_all(Head, [Key], Result) ->
+  [{Head, [{'==', '$1', Key}], [Result]}];
+
+match_all(Head, Keys, Result) ->
+  [{Head, [match_all(Keys)], [Result]}].
+
+match_all([First, Second | []]) ->
+  {'orelse', {'==', '$1', First}, {'==', '$1', Second}};
+
+match_all([First | Rest]) ->
+  {'orelse', {'==', '$1', First}, match_all(Rest)}.
