@@ -274,7 +274,7 @@ fetch_tree(Id) ->
   fetch_tree(Id, -1).
 
 fetch_tree({flow, Id}, 0) ->
-  {atomic, [Drop]} = find_drop_of([Id]), Drop;
+  {atomic, Drop} = find_drop_of(Id), {atomic, Drop#flow_drop.id};
 
 fetch_tree({drop, Id}, 0) ->
   {atomic, Id};
