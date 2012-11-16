@@ -93,6 +93,9 @@
 -spec flow_database:find_flows(Expression :: string()) ->
   [integer()].
 
+-spec flow_database:find_drop_of(Flows :: [integer()]) ->
+  {'atomic', [{integer(), #flow_drop{}}]} | {'aborted', any()}.
+
 -spec flow_database:create_moderator(Email :: string()) ->
   {'atomic', #flow_moderator{}} | {'aborted', any()}.
 

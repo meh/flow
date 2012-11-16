@@ -22,7 +22,7 @@
 -export([create/1, wait_for_tables/0, wait_for_tables/1, delete/0]).
 -export([create_float/1, create_float/2, find_float/1, find_or_create_float/1]).
 -export([create_drop/1, create_drop/2, find_drop/1, find_drops/1]).
--export([create_flow/3, add_floats/2, delete_floats/2, find_flow/1, find_flows/1]).
+-export([create_flow/3, add_floats/2, delete_floats/2, find_flow/1, find_flows/1, find_drop_of/1]).
 -export([create_moderator/1, delete_moderator/1, is_moderator/1]).
 
 create(Nodes) ->
@@ -243,6 +243,11 @@ in_expression(Flow, {'or', Left, Right}, Floats) ->
 
 in_expression(Flow, Term, Floats) when is_list(Term) ->
   lists:member(Flow, dict:fetch(Term, Floats)).
+
+find_drop_of(Flows) ->
+  mnesia:transaction(fun() ->
+        mnesia:select(flow_drop, match_all(#flow_drop{flow = '$1', _ = '_'}, Flows, {{'$1', '$_'}}))
+    end).
 
 create_moderator(Email) ->
   mnesia:transaction(fun() ->
