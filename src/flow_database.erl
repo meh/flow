@@ -239,6 +239,7 @@ filter_flows(Expression, Floats) ->
 
   filter_flows(ParsedExpression, Floats, Flows).
 
+% the Expression was just a single float, return early
 filter_flows(ParsedExpression, _, Flows) when is_list(ParsedExpression) ->
   Flows;
 
@@ -254,6 +255,10 @@ in_expression(Flow, {'and', Left, Right}, Floats) ->
 in_expression(Flow, {'or', Left, Right}, Floats) ->
   in_expression(Flow, Left, Floats) or in_expression(Flow, Right, Floats);
 
+in_expression(Flow, {'xor', Left, Right}, Floats) ->
+  in_expression(Flow, Left, Floats) xor in_expression(Flow, Right, Floats);
+
+% Term is a string, check if the Flow has that float
 in_expression(Flow, Term, Floats) when is_list(Term) ->
   lists:member(Flow, dict:fetch(Term, Floats)).
 
