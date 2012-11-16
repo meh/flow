@@ -23,6 +23,9 @@ Rules.
 \|\|?    : {token, {'or', TokenLine}}.
 [Oo][Rr] : {token, {'or', TokenLine}}.
 
+\^\^?        : {token, {'xor', TokenLine}}.
+[Xx][Oo][Rr] : {token, {'xor', TokenLine}}.
+
 [()] : {token, {list_to_atom(TokenChars), TokenLine}}.
 
 {C}+    : {token, {tag, TokenLine, TokenChars}}.

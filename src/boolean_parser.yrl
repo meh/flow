@@ -20,6 +20,7 @@ expressions -> '(' expressions ')' : '$2'.
 expressions -> 'not' expressions : {'not', '$2'}.
 expressions -> expressions 'and' expressions : {'and', '$1', '$3'}.
 expressions -> expressions 'or' expressions : {'or', '$1', '$3'}.
+expressions -> expressions 'xor' expressions : {'xor', '$1', '$3'}.
 
 element -> tag : normalize(element(3, '$1')).
 
