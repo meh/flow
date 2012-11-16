@@ -41,16 +41,16 @@
     email :: string(),
     token :: string() }).
 
--spec flow_database:install(Node :: [node()]) ->
+-spec flow_database:create(Node :: [node()]) ->
   'ok'.
 
 -spec flow_database:wait_for_tables() ->
-  'ok' | {'timeout', []} | {'error', any()}.
+  'ok' | {'timeout', list()} | {'error', any()}.
 
 -spec flow_database:wait_for_tables(Timeout :: timeout()) ->
-  'ok' | {'timeout', []} | {'error', any()}.
+  'ok' | {'timeout', list()} | {'error', any()}.
 
--spec flow_database:uninstall() ->
+-spec flow_database:delete() ->
   'ok'.
 
 -spec flow_database:create_float(Name :: string()) ->

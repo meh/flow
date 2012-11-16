@@ -19,13 +19,13 @@
 
 -include("flow_database.hrl").
 
--export([install/1, wait_for_tables/0, wait_for_tables/1, uninstall/0]).
+-export([create/1, wait_for_tables/0, wait_for_tables/1, delete/0]).
 -export([create_float/1, create_float/2, find_float/1, find_or_create_float/1]).
 -export([create_drop/1, create_drop/2, find_drop/1, find_drops/1]).
 -export([create_flow/3, add_floats/2, delete_floats/2, find_flow/1, find_flows/1]).
 -export([create_moderator/1, delete_moderator/1, is_moderator/1]).
 
-install(Nodes) ->
+create(Nodes) ->
   {_, ok} = mnesia:create_table(flow_id,
                       [{attributes, record_info(fields, flow_id)},
                        {disc_copies, Nodes}]),
@@ -55,7 +55,7 @@ wait_for_tables() ->
 wait_for_tables(Timeout) ->
   mnesia:wait_for_tables([flow_id, flow_float, flow_drop, flow_flow, flow_moderator], Timeout).
 
-uninstall() ->
+delete() ->
   mnesia:delete_table(flow_id),
   mnesia:delete_table(flow_float),
   mnesia:delete_table(flow_drop),
