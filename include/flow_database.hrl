@@ -91,7 +91,7 @@
   {'atomic', #flow_flow{} | 'undefined'} | {'aborted', any()}.
 
 -spec flow_database:find_flows(Expression :: string()) ->
-  [integer()].
+  {'atomic', [integer()]} | {'aborted', any()}.
 
 -spec flow_database:find_drop_of(Flows :: [integer()]) ->
   {'atomic', [{integer(), #flow_drop{}}]} | {'aborted', any()}.

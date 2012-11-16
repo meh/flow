@@ -213,12 +213,10 @@ find_flows(Expression) ->
   MatchSpec = match_all(#flow_float{name = '$1', flows = '$2', _ = '_'},
                         boolean_parser:elements(Expression), {{'$1', '$2'}}),
 
-  {atomic, Floats} = mnesia:transaction(fun() ->
-        mnesia:select(flow_float, MatchSpec)
-    end),
-
-  filter_flows(Expression, dict:from_list(Floats)).
-
+  case mnesia:transaction(fun() -> mnesia:select(flow_float, MatchSpec) end) of
+    {atomic, Floats} -> {atomic, filter_flows(Expression, dict:from_list(Floats))};
+    Error            -> Error
+  end.
 
 filter_flows(Expression, Floats) ->
   {ok, ParsedExpression} = boolean_parser:expression(Expression),
