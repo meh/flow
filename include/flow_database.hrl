@@ -98,6 +98,12 @@
 -spec flow_database:find_drop_of(Flows :: [integer()]) ->
   {'atomic', [{integer(), #flow_drop{}}]} | {'aborted', any()}.
 
+-spec flow_database:fetch_tree(Id :: {'drop', integer()} | {'flow', integer()}) ->
+  {'atomic', #flow_drop{}} | {'aborted', any()}.
+
+-spec flow_database:fetch_tree(Id :: {'drop', integer()} | {'flow', integer()}, Depth :: integer()) ->
+  {'atomic', #flow_drop{} | integer()} | {'aborted', any()}.
+
 -spec flow_database:create_moderator(Email :: string()) ->
   {'atomic', #flow_moderator{}} | {'aborted', any()}.
 

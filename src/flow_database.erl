@@ -23,7 +23,7 @@
 -export([create/1, wait_for_tables/0, wait_for_tables/1, delete/0]).
 -export([create_float/1, create_float/2, find_float/1, find_or_create_float/1]).
 -export([create_drop/1, create_drop/2, find_drop/1, find_drops/1]).
--export([create_flow/3, add_floats/2, delete_floats/2, find_flow/1, find_flows/1, find_drop_of/1]).
+-export([create_flow/3, add_floats/2, delete_floats/2, find_flow/1, find_flows/1, find_drop_of/1, fetch_tree/2]).
 -export([create_moderator/1, delete_moderator/1, is_moderator/1]).
 
 create(Nodes) ->
@@ -246,6 +246,31 @@ in_expression(Flow, Term, Floats) when is_list(Term) ->
 find_drop_of(Flows) ->
   mnesia:transaction(fun() ->
         mnesia:select(flow_drop, match_all(#flow_drop{flow = '$1', _ = '_'}, Flows, {{'$1', '$_'}}))
+    end).
+
+fetch_tree(Id) ->
+  fetch_tree(Id, -1).
+
+fetch_tree({flow, Id}, 0) ->
+  {atomic, [Drop]} = find_drop_of([Id]), Drop;
+
+fetch_tree({drop, Id}, 0) ->
+  {atomic, Id};
+
+fetch_tree({flow, Id}, Depth) ->
+  mnesia:transaction(fun() ->
+        [Flow] = mnesia:read({flow_flow, Id}),
+
+        {atomic, Result} = fetch_tree({drop, Flow#flow_flow.drop}, Depth), Result
+    end);
+
+fetch_tree({drop, Id}, Depth) ->
+  mnesia:transaction(fun() ->
+        [Drop] = mnesia:read({flow_drop, Id}),
+
+        Drop#flow_drop{children = lists:map(fun(CurrentId) ->
+                {atomic, CurrentDrop} = fetch_tree({drop, CurrentId}, Depth - 1), CurrentDrop
+            end, Drop#flow_drop.children)}
     end).
 
 create_moderator(Email) ->
