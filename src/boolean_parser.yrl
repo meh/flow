@@ -10,7 +10,7 @@ Nonterminals
   expressions element.
 
 Terminals
-  '(' ')' 'and' 'or' 'not' tag.
+  '(' ')' 'not' 'and' 'or' 'xor' tag.
 
 Rootsymbol
   expressions.
