@@ -99,17 +99,31 @@ find_or_create_float(Name) ->
     end).
 
 create_drop(Content) ->
-  create_drop(undefined, Content).
+  mnesia:transaction(fun() ->
+        Drop = #flow_drop{
+            id      = auto_increment(flow_drop),
+            date    = calendar:now_to_universal_time(now()),
+            content = Content },
+
+        mnesia:write(Drop),
+
+        Drop
+    end).
 
 create_drop(Parent, Content) ->
   mnesia:transaction(fun() ->
         Drop = #flow_drop{
             id      = auto_increment(flow_drop),
-            date    = calendar:now_to_universal_time(now()),
             parent  = Parent,
+            date    = calendar:now_to_universal_time(now()),
             content = Content },
 
+        [ParentDrop] = mnesia:wread({flow_drop, Parent}),
+
         mnesia:write(Drop),
+        mnesia:write(ParentDrop#flow_drop{
+            parent   = Parent,
+            children = ParentDrop#flow_drop.children ++ [Drop#flow_drop.id] }),
 
         Drop
     end).
