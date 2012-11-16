@@ -15,6 +15,8 @@
 % You should have received a copy of the GNU Affero General Public License
 % along with flow. If not, see <http://www.gnu.org/licenses/>.
 
+-author('meh. <meh@schizofreni.co>').
+
 -record(flow_id, {
     type :: atom(),
     id   :: integer() }).

@@ -16,6 +16,7 @@
 % along with flow. If not, see <http://www.gnu.org/licenses/>.
 
 -module(flow_database).
+-author('meh. <meh@schizofreni.co>').
 
 -include("flow_database.hrl").
 
