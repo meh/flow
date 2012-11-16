@@ -95,8 +95,8 @@
 -spec flow_database:find_flows(Expression :: string()) ->
   {'atomic', [integer()]} | {'aborted', any()}.
 
--spec flow_database:find_drop_of(Flows :: [integer()]) ->
-  {'atomic', [{integer(), #flow_drop{}}]} | {'aborted', any()}.
+-spec flow_database:find_drop_of(Ids :: [integer()] | integer()) ->
+  {'atomic', [{integer(), #flow_drop{}}] | #flow_drop{}} | {'aborted', any()}.
 
 -spec flow_database:fetch_tree(Id :: {'drop', integer()} | {'flow', integer()}) ->
   {'atomic', #flow_drop{}} | {'aborted', any()}.

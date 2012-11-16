@@ -257,9 +257,17 @@ in_expression(Flow, {'or', Left, Right}, Floats) ->
 in_expression(Flow, Term, Floats) when is_list(Term) ->
   lists:member(Flow, dict:fetch(Term, Floats)).
 
-find_drop_of(Flows) ->
+find_drop_of(Id) when is_integer(Id) ->
   mnesia:transaction(fun() ->
-        mnesia:select(flow_drop, match_all(#flow_drop{flow = '$1', _ = '_'}, Flows, {{'$1', '$_'}}))
+        [Flow] = mnesia:read({flow_flow, Id}),
+        [Drop] = mnesia:read({flow_drop, Flow#flow_flow.id}),
+
+        Drop
+    end);
+
+find_drop_of(Ids) when is_list(Ids) ->
+  mnesia:transaction(fun() ->
+        mnesia:select(flow_drop, match_all(#flow_drop{flow = '$1', _ = '_'}, Ids, {{'$1', '$_'}}))
     end).
 
 fetch_tree(Id) ->
