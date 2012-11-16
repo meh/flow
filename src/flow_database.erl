@@ -132,22 +132,28 @@ find_drops(Ids) ->
 create_flow(_, _, []) ->
   {aborted, no_floats};
 
-create_flow(Title, Drop, Floats) ->
-  Id = case is_list(Drop) of
-    true  -> {atomic, Created} = create_drop(Drop), Created#flow_drop.id;
-    false -> Drop
+create_flow(Title, IdOrContent, Floats) ->
+  Id = case is_list(IdOrContent) of
+    true  -> {atomic, Created} = create_drop(IdOrContent), Created#flow_drop.id;
+    false -> IdOrContent
   end,
 
   mnesia:transaction(fun() ->
-        NewFlow = #flow_flow{
-            id    = auto_increment(flow_flow),
-            title = Title,
-            drop  = Id },
+        case mnesia:wread({flow_drop, Id}) of
+          [Drop = #flow_drop{flow = undefined, _ = _}] ->
+            NewFlow = #flow_flow{
+                id    = auto_increment(flow_flow),
+                title = Title,
+                drop  = Id },
 
-        mnesia:write(NewFlow),
+            mnesia:write(NewFlow),
+            mnesia:write(Drop#flow_drop{flow = NewFlow#flow_flow.id}),
 
-        {atomic, Flow} = add_floats(NewFlow#flow_flow.id, Floats),
-        Flow
+            {atomic, Flow} = add_floats(NewFlow#flow_flow.id, Floats), Flow;
+
+          [_] -> mnesia:abort(drop_already_in_flow);
+          _   -> mnesia:abort(drop_not_found)
+        end
     end).
 
 add_floats(Id, Floats) ->

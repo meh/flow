@@ -28,6 +28,7 @@
     id                   :: integer(),
     date                 :: {{integer(), integer(), integer()}, {integer(), integer(), integer()}},
     content              :: string(),
+    flow     = undefined :: 'undefined' | integer(),
     parent   = undefined :: 'undefined' | integer(),
     children = []        :: [integer()] }).
 
@@ -77,7 +78,7 @@
 -spec flow_databases:find_drops(Ids :: [integer()]) ->
   {'atomic', [#flow_drop{}]} | {'aborted', any()}.
 
--spec flow_database:create_flow(Title :: string(), Drop :: integer() | string(), Floats :: [string()]) ->
+-spec flow_database:create_flow(Title :: string(), IdOrContent :: integer() | string(), Floats :: [string()]) ->
   {'atomic', #flow_flow{}} | {'aborted', any()}.
 
 -spec flow_database:add_floats(Id :: integer(), Floats :: [string()]) ->
