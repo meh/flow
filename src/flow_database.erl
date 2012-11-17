@@ -328,7 +328,7 @@ find_last_update([], Max) ->
 
 find_last_update([Drop | Rest], Max) ->
   First  = find_last_update(Drop, Max),
-  Second = find_last_update(Rest, First),
+  Second = find_last_update(Rest, Max),
 
   case First =< Second of
     true  -> Second;
