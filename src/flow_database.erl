@@ -331,7 +331,11 @@ find_last_update(#flow_drop{children = []}, Max) ->
 
 find_last_update(Drop, Max) when Max < Drop#flow_drop.date ->
   [Other | _] = lists:sort(fun erlang:'>'/2, lists:map(fun(D) ->
-              find_last_update(D, Max) end, Drop#flow_drop.children)),
+            case D of
+              #flow_drop{flow = undefined} -> find_last_update(D, Max);
+              _                            -> Max
+            end
+        end, Drop#flow_drop.children)),
 
   case Max =< Other of
     true  -> Other;
