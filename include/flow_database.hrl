@@ -110,6 +110,9 @@
 -spec flow_database:sort_flows_by(By :: 'creation' | 'update', Flows :: [integer()]) ->
   [integer()].
 
+-spec flow_database:find_last_update(Id :: {'drop' | 'flow', integer()}) ->
+  {{integer(), integer(), integer()}, {integer(), integer(), integer()}}.
+
 -spec flow_database:create_moderator(Email :: string()) ->
   {'atomic', #flow_moderator{}} | {'aborted', any()}.
 
