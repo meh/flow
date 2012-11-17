@@ -321,7 +321,7 @@ sort_flows_by(update, Flows) ->
 find_last_update(Id) ->
   {atomic, Drop} = fetch_tree(Id),
 
-  find_last_update(Drop, 0).
+  find_last_update(Drop#flow_drop{flow = undefined}, 0).
 
 find_last_update([], Max) ->
   Max;
@@ -341,8 +341,11 @@ find_last_update(Drop = #flow_drop{children = []}, Max) when Max =< Drop#flow_dr
 find_last_update(#flow_drop{children = []}, Max) ->
   Max;
 
-find_last_update(Drop = #flow_drop{}, Max) when Max =< Drop#flow_drop.date ->
+find_last_update(Drop = #flow_drop{flow = undefined}, Max) when Max =< Drop#flow_drop.date ->
   find_last_update(Drop#flow_drop.children, Drop#flow_drop.date);
+
+find_last_update(Drop = #flow_drop{}, Max) when Max =< Drop#flow_drop.date ->
+  Drop#flow_drop.date;
 
 find_last_update(#flow_drop{}, Max) ->
   Max.
