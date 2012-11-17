@@ -104,6 +104,9 @@
 -spec flow_database:fetch_tree(Id :: {'drop', integer()} | {'flow', integer()}, Depth :: integer()) ->
   {'atomic', #flow_drop{} | integer()} | {'aborted', any()}.
 
+-spec flow_database:sort_flows_by(By :: 'creation' | 'update', Flows :: [integer()]) ->
+  [integer()].
+
 -spec flow_database:create_moderator(Email :: string()) ->
   {'atomic', #flow_moderator{}} | {'aborted', any()}.
 

@@ -23,7 +23,7 @@
 -export([create/1, wait_for_tables/0, wait_for_tables/1, delete/0]).
 -export([create_float/1, create_float/2, find_float/1, find_or_create_float/1]).
 -export([create_drop/1, create_drop/2, find_drop/1, find_drops/1]).
--export([create_flow/3, add_floats/2, delete_floats/2, find_flow/1, find_flows/1, find_drop_of/1, fetch_tree/1, fetch_tree/2]).
+-export([create_flow/3, add_floats/2, delete_floats/2, find_flow/1, find_flows/1, find_drop_of/1, fetch_tree/1, fetch_tree/2, sort_flows_by/2]).
 -export([create_moderator/1, delete_moderator/1, is_moderator/1]).
 
 create(Nodes) ->
@@ -299,6 +299,37 @@ fetch_tree({drop, Id}, Depth) ->
                 {atomic, CurrentDrop} = fetch_tree({drop, CurrentId}, Depth - 1), CurrentDrop
             end, Drop#flow_drop.children)}
     end).
+
+sort_flows_by(creation, Flows) ->
+  lists:map(fun({Flow, _}) -> Flow end, lists:sort(fun({_, #flow_drop{date = A}}, {_, #flow_drop{date = B}}) ->
+          A =< B end, find_drop_of(Flows)));
+
+sort_flows_by(update, Flows) ->
+  lists:map(fun({Flow, _}) -> Flow end, lists:sort(fun({A, _}, {B, _}) ->
+          find_last_update(A) =< find_last_update(B) end, find_drop_of(Flows))).
+
+find_last_update(Id) ->
+  {atomic, Drop} = fetch_tree({flow, Id}),
+
+  find_last_update(Drop, 0).
+
+find_last_update(Drop = #flow_drop{children = []}, Max) when Max =< Drop#flow_drop.date ->
+  Drop#flow_drop.date;
+
+find_last_update(Drop = #flow_drop{children = []}, Max) when Max > Drop#flow_drop.date ->
+  Max;
+
+find_last_update(Drop, Max) when Max < Drop#flow_drop.date ->
+  [Other | _] = lists:sort(fun erlang:'>'/2, lists:map(fun(D) ->
+              find_last_update(D, Max) end, Drop#flow_drop.children)),
+
+  case Max =< Other of
+    true  -> Other;
+    false -> Max
+  end;
+
+find_last_update(_, Max) ->
+  Max.
 
 create_moderator(Email) ->
   mnesia:transaction(fun() ->
