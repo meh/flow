@@ -32,7 +32,7 @@
     content              :: string(),
     flow     = undefined :: 'undefined' | integer(),
     parent   = undefined :: 'undefined' | integer(),
-    children = []        :: [integer() | #flow_drop] }).
+    children = []        :: [integer() | #flow_drop{}] }).
 
 -record(flow_flow, {
     id          :: integer(),
