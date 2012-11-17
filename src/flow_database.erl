@@ -316,12 +316,24 @@ sort_flows_by(creation, Flows) ->
 
 sort_flows_by(update, Flows) ->
   lists:map(fun({Flow, _}) -> Flow end, lists:sort(fun({A, _}, {B, _}) ->
-          find_last_update(A) =< find_last_update(B) end, find_drop_of(Flows))).
+          find_last_update({flow, A}) =< find_last_update({flow, B}) end, find_drop_of(Flows))).
 
 find_last_update(Id) ->
-  {atomic, Drop} = fetch_tree({flow, Id}),
+  {atomic, Drop} = fetch_tree(Id),
 
   find_last_update(Drop, 0).
+
+find_last_update([], Max) ->
+  Max;
+
+find_last_update([Drop | Rest], Max) ->
+  First  = find_last_update(Drop, Max),
+  Second = find_last_update(Rest, First),
+
+  case First =< Second of
+    true  -> Second;
+    false -> First
+  end;
 
 find_last_update(Drop = #flow_drop{children = []}, Max) when Max =< Drop#flow_drop.date ->
   Drop#flow_drop.date;
@@ -329,20 +341,10 @@ find_last_update(Drop = #flow_drop{children = []}, Max) when Max =< Drop#flow_dr
 find_last_update(#flow_drop{children = []}, Max) ->
   Max;
 
-find_last_update(Drop, Max) when Max < Drop#flow_drop.date ->
-  [Other | _] = lists:sort(fun erlang:'>'/2, lists:map(fun(D) ->
-            case D of
-              #flow_drop{flow = undefined} -> find_last_update(D, Max);
-              _                            -> Max
-            end
-        end, Drop#flow_drop.children)),
+find_last_update(Drop = #flow_drop{}, Max) when Max =< Drop#flow_drop.date ->
+  find_last_update(Drop#flow_drop.children, Drop#flow_drop.date);
 
-  case Max =< Other of
-    true  -> Other;
-    false -> Max
-  end;
-
-find_last_update(_, Max) ->
+find_last_update(#flow_drop{}, Max) ->
   Max.
 
 create_moderator(Email) ->
