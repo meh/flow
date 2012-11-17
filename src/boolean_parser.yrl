@@ -26,6 +26,14 @@ element -> tag : normalize(element(3, '$1')).
 
 Erlang code.
 
+-export_type([expression/0]).
+
+-type expression() :: string() |
+  {'not', expression()} |
+  {'and', expression(), expression()} |
+  {'or', expression(), expression()} |
+  {'xor', expression(), expression()}.
+
 -export([normalize/1, expression/1, elements/1]).
 
 % XXX: replace [\-_] with -?
