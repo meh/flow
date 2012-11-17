@@ -316,7 +316,7 @@ find_last_update(Id) ->
 find_last_update(Drop = #flow_drop{children = []}, Max) when Max =< Drop#flow_drop.date ->
   Drop#flow_drop.date;
 
-find_last_update(Drop = #flow_drop{children = []}, Max) when Max > Drop#flow_drop.date ->
+find_last_update(#flow_drop{children = []}, Max) ->
   Max;
 
 find_last_update(Drop, Max) when Max < Drop#flow_drop.date ->
