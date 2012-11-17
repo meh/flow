@@ -23,7 +23,7 @@
 
 -record(flow_float, {
     name            :: string(),
-    attributes = [] :: list(),
+    attributes = [] :: [{atom(), any()}],
     flows      = [] :: [integer()] }).
 
 -record(flow_drop, {
