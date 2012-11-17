@@ -41,8 +41,9 @@
     drop        :: integer() }).
 
 -record(flow_moderator, {
-    email :: string(),
-    token :: string() }).
+    email      :: string(),
+    attributes :: [{atom(), any()}],
+    token      :: string() }).
 
 -spec flow_database:create(Node :: [node()]) ->
   'ok'.
