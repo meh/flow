@@ -83,6 +83,9 @@
 -spec flow_database:create_flow(Title :: string(), IdOrContent :: integer() | string(), Floats :: [string()]) ->
   {'atomic', #flow_flow{}} | {'aborted', any()}.
 
+-spec flow_database:change_title(Id :: integer(), Title :: string()) ->
+  {'atomic', #flow_flow{}} | {'aborted', any()}.
+
 -spec flow_database:add_floats(Id :: integer(), Floats :: [string()]) ->
   {'atomic', #flow_flow{}} | {'aborted', any()}.
 

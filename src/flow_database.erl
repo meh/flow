@@ -23,7 +23,7 @@
 -export([create/1, wait_for_tables/0, wait_for_tables/1, delete/0]).
 -export([create_float/1, create_float/2, find_float/1, find_or_create_float/1]).
 -export([create_drop/1, create_drop/2, find_drop/1, find_drops/1]).
--export([create_flow/3, add_floats/2, delete_floats/2, find_flow/1, find_flows/1, find_drop_of/1, fetch_tree/1, fetch_tree/2, sort_flows_by/2]).
+-export([create_flow/3, change_title/2, add_floats/2, delete_floats/2, find_flow/1, find_flows/1, find_drop_of/1, fetch_tree/1, fetch_tree/2, sort_flows_by/2]).
 -export([create_moderator/1, delete_moderator/1, is_moderator/1]).
 
 create(Nodes) ->
@@ -169,6 +169,16 @@ create_flow(Title, IdOrContent, Floats) ->
           [_] -> mnesia:abort(drop_already_in_flow);
           _   -> mnesia:abort(drop_not_found)
         end
+    end).
+
+change_title(Id, Title) ->
+  mnesia:transaction(fun() ->
+        [Flow]  = mnesia:wread({flow_flow, Id}),
+        NewFlow = Flow#flow_flow{title = Title},
+
+        mnesia:write(NewFlow),
+
+        NewFlow
     end).
 
 add_floats(Id, Floats) ->
