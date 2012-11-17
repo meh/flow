@@ -32,7 +32,7 @@
     content              :: string(),
     flow     = undefined :: 'undefined' | integer(),
     parent   = undefined :: 'undefined' | integer(),
-    children = []        :: [integer()] }).
+    children = []        :: [integer() | #flow_drop] }).
 
 -record(flow_flow, {
     id          :: integer(),
@@ -101,10 +101,10 @@
 -spec flow_database:find_drop_of(Ids :: [integer()] | integer()) ->
   {'atomic', [{integer(), #flow_drop{}}] | #flow_drop{}} | {'aborted', any()}.
 
--spec flow_database:fetch_tree(Id :: {'drop', integer()} | {'flow', integer()}) ->
+-spec flow_database:fetch_tree(Id :: {'drop' | 'flow', integer()}) ->
   {'atomic', #flow_drop{}} | {'aborted', any()}.
 
--spec flow_database:fetch_tree(Id :: {'drop', integer()} | {'flow', integer()}, Depth :: integer()) ->
+-spec flow_database:fetch_tree(Id :: {'drop' | 'flow', integer()}, Depth :: integer()) ->
   {'atomic', #flow_drop{} | integer()} | {'aborted', any()}.
 
 -spec flow_database:sort_flows_by(By :: 'creation' | 'update', Flows :: [integer()]) ->
