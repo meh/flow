@@ -28,7 +28,7 @@
 
 -record(flow_drop, {
     id                   :: integer(),
-    date                 :: {{integer(), integer(), integer()}, {integer(), integer(), integer()}},
+    date                 :: calendar:datetime(),
     content              :: string(),
     flow     = undefined :: 'undefined' | integer(),
     parent   = undefined :: 'undefined' | integer(),
@@ -111,7 +111,7 @@
   [integer()].
 
 -spec flow_database:find_last_update(Id :: {'drop' | 'flow', integer()}) ->
-  {{integer(), integer(), integer()}, {integer(), integer(), integer()}}.
+  calendar:datetime().
 
 -spec flow_database:create_moderator(Email :: string()) ->
   {'atomic', #flow_moderator{}} | {'aborted', any()}.
