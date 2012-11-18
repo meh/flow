@@ -17,7 +17,7 @@
 
 -module(flow_rest).
 
--include("flow_database.hrl").
+-include("flow.hrl").
 -compile({no_auto_import, [get/1, get/0, put/2]}).
 -export([start/0, start/1, stop/0]).
 

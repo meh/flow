@@ -18,7 +18,7 @@
 -module(flow_database).
 -author('meh. <meh@schizofreni.co>').
 
--include("flow_database.hrl").
+-include("flow.hrl").
 
 -export([create/1, wait_for_tables/0, wait_for_tables/1, delete/0]).
 -export([create_float/1, create_float/2, find_float/1, find_or_create_float/1, merge_floats/2]).
