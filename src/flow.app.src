@@ -3,6 +3,7 @@
   {vsn, "0.0.1"},
   {modules, [
     flow_rest,
+    flow_json,
     flow_database,
     boolean_lexer,
     boolean_parser
