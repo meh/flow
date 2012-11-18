@@ -23,7 +23,7 @@
 
 -record(flow_float, {
     name            :: string(),
-    attributes = [] :: [{atom(), any()}],
+    properties = [] :: proplists:proplist(),
     flows      = [] :: [integer()] }).
 
 -record(flow_drop, {
@@ -42,7 +42,7 @@
 
 -record(flow_moderator, {
     email      :: string(),
-    attributes :: [{atom(), any()}],
+    properties :: proplists:proplist(),
     token      :: string() }).
 
 -spec flow_database:create(Node :: [node()]) ->
@@ -60,7 +60,7 @@
 -spec flow_database:create_float(Name :: string()) ->
   {'atomic', #flow_float{}} | {'aborted', any()}.
 
--spec flow_database:create_float(Name :: string(), Attributes :: list()) ->
+-spec flow_database:create_float(Name :: string(), Properties :: proplists:proplist()) ->
   {'atomic', #flow_float{}} | {'aborted', any()}.
 
 -spec flow_database:find_float(Name :: string()) ->
@@ -118,6 +118,9 @@
   calendar:datetime().
 
 -spec flow_database:create_moderator(Email :: string()) ->
+  {'atomic', #flow_moderator{}} | {'aborted', any()}.
+
+-spec flow_database:create_moderator(Email :: string(), Properties :: proplists:proplist()) ->
   {'atomic', #flow_moderator{}} | {'aborted', any()}.
 
 -spec flow_database:delete_moderator(Email :: string()) ->

@@ -71,11 +71,11 @@ auto_increment(Name) ->
 create_float(Name) ->
   create_float(Name, []).
 
-create_float(Name, Attributes) ->
+create_float(Name, Properties) ->
   mnesia:transaction(fun() ->
         Float = #flow_float{
             name       = boolean_parser:normalize(Name),
-            attributes = Attributes },
+            properties = Properties },
 
         mnesia:write(Float),
 
@@ -382,14 +382,14 @@ find_last_update(#flow_drop{}, Max) ->
 create_moderator(Email) ->
   create_moderator(Email, []).
 
-create_moderator(Email, Attributes) ->
+create_moderator(Email, Properties) ->
   mnesia:transaction(fun() ->
         case mnesia:read({flow_moderator, Email}) of
           [Moderator] -> Moderator;
           _           ->
             Moderator = #flow_moderator{
                 email      = Email,
-                attributes = Attributes,
+                properties = Properties,
                 token      = generate_token() },
 
             mnesia:write(Moderator),
