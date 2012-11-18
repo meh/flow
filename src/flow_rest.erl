@@ -16,9 +16,10 @@
 % along with flow. If not, see <http://www.gnu.org/licenses/>.
 
 -module(flow_rest).
+-author('meh. <meh@schizofreni.co>').
 
 -include("flow.hrl").
--compile({no_auto_import, [get/1, get/0, put/2]}).
+-compile({no_auto_import, [get/1, get/0, put/2, error/1, error/2]}).
 -export([start/0, start/1, stop/0]).
 
 start() ->
@@ -26,39 +27,57 @@ start() ->
 
 start(Port) ->
   mnesia:start(),
-  misultin:start_link([{port, Port}, {loop, fun handle_http/1}]),
+  misultin:start_link([{port, Port}, {loop, fun handle/1}]),
   flow_database:wait_for_tables().
 
 stop() ->
   misultin:stop(),
   mnesia:stop().
 
-handle_http(Req) ->
+handle(Req) ->
   Resource = Req:resource([lowercase, urldecode]),
 
   case Req:get(method) of
     'GET'    -> get(Resource, Req:parse_qs(), Req);
-    'POST'   -> post(Resource, Req:parse_qs(), rfc4627:decode(Req:get(body)), Req);
-    'PUT'    -> put(Resource, Req:parse_qs(), rfc4627:decode(Req:get(body)), Req);
-    'DELETE' -> delete(Resource, Req:parse_qs(), rfc4627:decode(Req:get(body)), Req)
+    'POST'   -> post(Resource, Req:parse_qs(), flow_json:decode(Req:get(body)), Req);
+    'PUT'    -> put(Resource, Req:parse_qs(), flow_json:decode(Req:get(body)), Req);
+    'DELETE' -> delete(Resource, Req:parse_qs(), flow_json:decode(Req:get(body)), Req)
   end.
 
-get(["flow", Id], _, Req) ->
-  case flow_database:find_flow(list_to_integer(Id)) of
-    {atomic, undefined} -> respond(null, Req);
-    {atomic, Flow}      -> respond({obj, [
-            {title, list_to_binary(Flow#flow_flow.title)},
-            {floats, lists:map(fun erlang:list_to_binary/1, Flow#flow_flow.floats)},
-            {drop, Flow#flow_flow.drop}]}, Req)
+get(["drop", Id], Query, Req) ->
+  {atomic, Drop} = case Req:get_variable("depth", Query) of
+    undefined -> flow_database:find_drop(list_to_integer(Id));
+    Depth     -> flow_database:fetch_tree({drop, list_to_integer(Id)}, list_to_integer(Depth))
+  end,
+
+  respond(flow_json:from_drop(Drop), Req);
+
+get(["flow", Id], Query, Req) ->
+  {atomic, Flow} = flow_database:find_flow(list_to_integer(Id)),
+
+  case Req:get_variable("depth", Query) of
+    undefined ->
+      respond(flow_json:from_flow(Flow), Req);
+
+    Depth ->
+      {atomic, Drop} = flow_database:fetch_tree({drop, Flow#flow_flow.drop}, list_to_integer(Depth)),
+
+      respond(flow_json:from_flow(Flow#flow_flow{drop = Drop}), Req)
   end;
 
-get(["flows", Expression], Query, Req) ->
+get(["flows", Expression], _, Req) ->
   Flows = flow_database:find_flows(Expression),
 
   respond(Flows, Req);
 
 get(_, _, Req) ->
   Req:respond(404, [{"Content-Type", "text/plain"}], "What is love?").
+
+post(["flow"], _, {obj, Data}, Req) ->
+  respond(flow_json:from_flow(flow_database:create_flow(
+        orddict:fetch("title", Data),
+        orddict:fetch("content", Data),
+        orddict:fetch("floats", Data))), Req);
 
 post(_, _, _, Req) ->
   Req:respond(404, [{"Content-Type", "text/plain"}], "Baby don't hurt me.").
@@ -70,4 +89,4 @@ delete(_, _, _, Req) ->
   Req:respond(404, [{"Content-Type", "text/plain"}], "No more.").
 
 respond(Data, Req) ->
-  Req:ok([{"Content-Type", rfc4627:mime_type()}], rfc4627:encode(Data)).
+  Req:ok([{"Content-Type", flow_json:mime_type()}], flow_json:encode(Data)).
