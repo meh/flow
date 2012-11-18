@@ -41,6 +41,10 @@
     properties :: proplists:proplist(),
     token      :: string() }).
 
+% database specs
+-spec flow_database:create() ->
+  'ok'.
+
 -spec flow_database:create(Node :: [node()]) ->
   'ok'.
 
