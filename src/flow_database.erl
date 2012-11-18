@@ -205,7 +205,7 @@ change_title(Id, Title) ->
 
 add_floats(Id, Floats) ->
   mnesia:transaction(fun() ->
-        [Flow] = mnesia:wread({flow_flow, Id}),
+        [Flow]        = mnesia:wread({flow_flow, Id}),
         MissingFloats = lists:filter(fun(Elem) ->
                 not lists:member(Elem, Flow#flow_flow.floats)
             end, lists:usort(Floats)),
@@ -215,10 +215,14 @@ add_floats(Id, Floats) ->
           _ ->
             NewFlow = Flow#flow_flow{ floats = Flow#flow_flow.floats ++ lists:map(fun(Name) ->
                       {atomic, Float} = find_or_create_float(Name),
+
                       mnesia:write(Float#flow_float{flows = [Id | Float#flow_float.flows]}),
+
                       Float#flow_float.name
                   end, MissingFloats)},
+
             mnesia:write(NewFlow),
+
             NewFlow
         end
     end).
@@ -226,24 +230,27 @@ add_floats(Id, Floats) ->
 delete_floats(Id, Floats) ->
   mnesia:transaction(fun() ->
         {atomic, Flow} = find_flow(Id),
-        Length = length(Flow#flow_flow.floats),
-        PresentFloats = lists:filter(fun(Elem) ->
+        Length         = length(Flow#flow_flow.floats),
+        PresentFloats  = lists:filter(fun(Elem) ->
                 lists:member(Elem, Flow#flow_flow.floats)
             end, lists:usort(Floats)),
 
         case length(PresentFloats) of
           Length -> mnesia:abort(no_floats);
-          0 -> Flow;
-          _ ->
+          0      -> Flow;
+          _      ->
             lists:foreach(fun(Name) ->
                   {atomic, Float} = find_float(Name),
+
                   mnesia:write(Float#flow_float{flows = lists:delete(Id, Float#flow_float.flows)})
               end, PresentFloats),
 
             NewFlow = Flow#flow_flow{ floats = lists:filter(fun(Float) ->
                       not lists:member(Float, PresentFloats)
                   end, Flow#flow_flow.floats) },
+
             mnesia:write(NewFlow),
+
             NewFlow
         end
     end).
@@ -379,7 +386,7 @@ create_moderator(Email, Attributes) ->
   mnesia:transaction(fun() ->
         case mnesia:read({flow_moderator, Email}) of
           [Moderator] -> Moderator;
-          _ ->
+          _           ->
             Moderator = #flow_moderator{
                 email      = Email,
                 attributes = Attributes,
