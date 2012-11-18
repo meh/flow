@@ -17,10 +17,6 @@
 
 -author('meh. <meh@schizofreni.co>').
 
--record(flow_id, {
-    type :: atom(),
-    id   :: integer() }).
-
 -record(flow_float, {
     name            :: string(),
     properties = [] :: proplists:proplist(),

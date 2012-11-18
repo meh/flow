@@ -20,6 +20,8 @@
 
 -include("flow.hrl").
 
+-record(flow_id, { type :: atom(), id :: integer() }).
+
 -export([create/1, wait_for_tables/0, wait_for_tables/1, delete/0]).
 -export([create_float/1, create_float/2, find_float/1, find_or_create_float/1, merge_floats/2]).
 -export([create_drop/1, create_drop/2, find_drop/1, find_drops/1]).
