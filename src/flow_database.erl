@@ -21,7 +21,7 @@
 -include("flow_database.hrl").
 
 -export([create/1, wait_for_tables/0, wait_for_tables/1, delete/0]).
--export([create_float/1, create_float/2, find_float/1, find_or_create_float/1]).
+-export([create_float/1, create_float/2, find_float/1, find_or_create_float/1, merge_floats/2]).
 -export([create_drop/1, create_drop/2, find_drop/1, find_drops/1]).
 -export([create_flow/3, change_title/2, add_floats/2, delete_floats/2, find_flow/1, find_flows/1, find_drop_of/1, fetch_tree/1, fetch_tree/2, sort_flows_by/2, find_last_update/1]).
 -export([create_moderator/1, create_moderator/2, delete_moderator/1, is_moderator/1]).
@@ -97,6 +97,28 @@ find_or_create_float(Name) ->
           {atomic, Float}     -> Float
         end
     end).
+
+merge_floats(Float, Into) when Float == Into ->
+  ok;
+
+merge_floats(Float, Into) ->
+  case mnesia:transaction(fun() ->
+          [First]  = mnesia:wread({flow_float, Float}),
+          [Second] = mnesia:wread({flow_float, Into}),
+
+          lists:foreach(fun(Id) ->
+                [Flow] = mnesia:wread({flow_flow, Id}),
+
+                mnesia:write(Flow#flow_flow{
+                    floats = lists:usort([Into | lists:delete(Float, Flow#flow_flow.floats)]) })
+            end, lists:usort(First#flow_float.flows ++ Second#flow_float.flows)),
+
+          mnesia:write(Second#flow_float{flows = lists:usort(Second#flow_float.flows ++ First#flow_float.flows)}),
+          mnesia:delete({flow_float, Float})
+      end) of
+    Error = {aborted, _} -> Error;
+    _                    -> ok
+  end.
 
 create_drop(Content) ->
   mnesia:transaction(fun() ->

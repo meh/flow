@@ -69,6 +69,9 @@
 -spec flow_database:find_or_create_float(Name :: string()) ->
   {'atomic', #flow_float{}} | {'aborted', any()}.
 
+-spec flow_database:merge_floats(Float :: string(), Into :: string()) ->
+  'ok' | {'aborted', any()}.
+
 -spec flow_database:create_drop(Content :: string()) ->
   {'atomic', #flow_drop{}} | {'aborted', any()}.
 
