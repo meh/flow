@@ -150,7 +150,6 @@ create_drop(Parent, Content) ->
 
         mnesia:write(Drop),
         mnesia:write(ParentDrop#flow_drop{
-            parent   = Parent,
             children = ParentDrop#flow_drop.children ++ [Drop#flow_drop.id] }),
 
         Drop
