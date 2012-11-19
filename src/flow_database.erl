@@ -307,7 +307,7 @@ in_expression(Flow, Term, Floats) when is_list(Term) ->
 find_drop_of(Id) when is_integer(Id) ->
   mnesia:transaction(fun() ->
         [Flow] = mnesia:read({flow_flow, Id}),
-        [Drop] = mnesia:read({flow_drop, Flow#flow_flow.id}),
+        [Drop] = mnesia:read({flow_drop, Flow#flow_flow.drop}),
 
         Drop
     end);
