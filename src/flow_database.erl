@@ -19,7 +19,6 @@
 -author('meh. <meh@schizofreni.co>').
 
 -include("flow.hrl").
--compile(export_all).
 
 -record(flow_id, { type :: atom(), id :: integer() }).
 
