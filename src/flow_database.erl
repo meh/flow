@@ -163,12 +163,11 @@ find_drop(Id) ->
     end).
 
 find_drops(Ids) ->
-  MatchSpec       = match_all(#flow_drop{id = '$1', _ = '_'}, Ids, '$_'),
-  {atomic, Drops} = mnesia:transaction(fun() ->
-          mnesia:select(flow_drop, MatchSpec)
-      end),
+  MatchSpec = match_all(#flow_drop{id = '$1', _ = '_'}, Ids, '$_'),
 
-  Drops.
+  mnesia:transaction(fun() ->
+          mnesia:select(flow_drop, MatchSpec)
+      end).
 
 create_flow(_, _, []) ->
   {aborted, no_floats};
