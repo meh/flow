@@ -23,10 +23,10 @@ causing drama and distress.
 
 How to fix the situation
 ------------------------
-Instead of sections there should be flows, every flow has a name and optionally
-special attributes, an example could be **anime**, it would be a simple flow,
+Instead of sections there should be floats, every float has a name and optionally
+special attributes, an example could be **anime**, it would be a simple float,
 an example with attributes could be **announcement**, only moderators would be
-able to create flows with that name.
+able to create floats with that name.
 
 Some floats could be implicitly set for certain contexts, for example if you're
 posting in italian the **italiano** float would be implicitly set.
@@ -47,18 +47,6 @@ about this.
 Another vital part is self-moderation, users must have the ability to ignore
 people, flows and specific topics of discussion, this means the platform has to
 provide certain tools to filter effectively.
-
-Another must is anonimity and not forcing registration on users but letting
-them choose to register if wanted.
-
-A float could be added to require to be logged in to post.
-
-The registered user should be linked to an email, and the email should be
-forcibly verified, if you don't want to register you don't have to, you can
-post without an account.
-
-Having an account would give you more features, like keeping track of posts (if
-wanted).
 
 It's all about text, fuck images, fuck videos, fuck bullshit like this, there
 are other platforms that let you share that kind of multimedia and you can
