@@ -343,12 +343,16 @@ fetch_tree({drop, Id}, Depth) ->
     end).
 
 sort_flows_by(creation, Flows) ->
+  {atomic, Drops} = find_drop_of(Flows),
+
   lists:map(fun({Flow, _}) -> Flow end, lists:sort(fun({_, #flow_drop{date = A}}, {_, #flow_drop{date = B}}) ->
-          A =< B end, find_drop_of(Flows)));
+          B =< A end, Drops));
 
 sort_flows_by(update, Flows) ->
+  {atomic, Drops} = find_drop_of(Flows),
+
   lists:map(fun({Flow, _}) -> Flow end, lists:sort(fun({A, _}, {B, _}) ->
-          find_last_update({flow, A}) =< find_last_update({flow, B}) end, find_drop_of(Flows))).
+          find_last_update({flow, A}) =< find_last_update({flow, B}) end, Drops)).
 
 find_last_update(Id) ->
   {atomic, Drop} = fetch_tree(Id),
