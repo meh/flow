@@ -6,20 +6,20 @@
 -export([all/0, init_per_suite/1, end_per_suite/1, init_per_testcase/2, end_per_testcase/2]).
 -export([create_float/1, find_float/1, find_or_create_float/1, merge_floats/1]).
 -export([create_drop/1, find_drop/1, find_drops/1]).
--export([create_flow/1, change_title/1, add_floats/1, delete_floats/1, find_flow/1, find_flows/1, find_drop_of/1]).
+-export([create_flow/1, change_title/1, add_floats/1, delete_floats/1, find_flow/1, find_flows/1, find_drop_of/1, fetch_tree/1, sort_flows_by/1, find_last_update/1]).
 -export([create_moderator/1, delete_moderator/1, is_moderator/1]).
 
 all() -> [
     create_float, find_float, find_or_create_float, merge_floats,
     create_drop, find_drop, find_drops,
-    create_flow, change_title, add_floats, delete_floats, find_flow, find_flows, find_drop_of,
+    create_flow, change_title, add_floats, delete_floats, find_flow, find_flows, find_drop_of, fetch_tree, sort_flows_by, find_last_update,
     create_moderator, delete_moderator, is_moderator
   ].
 
 init_per_suite(Config) ->
   application:set_env(mnesia, dir, ?config(priv_dir, Config)),
   ok = mnesia:create_schema([node()]),
-  ok = mnesia:start(),
+  ok = application:start(mnesia),
 
   Config.
 
@@ -135,6 +135,52 @@ init_per_testcase(find_drop_of, Config) ->
   {atomic, _} = flow_database:create_flow("lol", "Don't lose your dinosaur", ["a", "b"]),
 
   Config;
+
+init_per_testcase(fetch_tree, Config) ->
+  start(Config),
+
+  {atomic, _} = flow_database:create_drop("konnichiwa"),
+  {atomic, _} = flow_database:create_drop(1, "o hai"),
+  {atomic, _} = flow_database:create_drop(1, "sup"),
+  {atomic, _} = flow_database:create_drop(2, "no u"),
+
+  {atomic, _} = flow_database:create_flow("omg", 1, ["a", "c"]),
+
+  Config;
+
+init_per_testcase(sort_flows_by, Config) ->
+  start(Config),
+
+  {atomic, _} = flow_database:create_drop("konnichiwa"),
+  {atomic, _} = flow_database:create_drop(1, "o hai"),
+  {atomic, _} = flow_database:create_drop(1, "sup"),
+  {atomic, _} = flow_database:create_flow("omg", 1, ["a", "c"]),
+
+  timer:sleep(timer:seconds(2)),
+
+  {atomic, _} = flow_database:create_drop(2, "no u"),
+  {atomic, _} = flow_database:create_flow("lol", "wut", ["a", "c"]),
+
+  Config;
+
+init_per_testcase(find_last_update, Config) ->
+  start(Config),
+
+  First = calendar:now_to_universal_time(now()),
+
+  {atomic, _} = flow_database:create_drop("konnichiwa"),
+  {atomic, _} = flow_database:create_drop(1, "o hai"),
+  {atomic, _} = flow_database:create_drop(1, "sup"),
+
+  timer:sleep(timer:seconds(2)),
+
+  Last = calendar:now_to_universal_time(now()),
+
+  {atomic, _} = flow_database:create_drop(2, "no u"),
+
+  {atomic, _} = flow_database:create_flow("omg", 1, ["a", "c"]),
+
+  [{times, {First, Last}} | Config];
 
 init_per_testcase(delete_moderator, Config) ->
   start(Config),
@@ -282,6 +328,28 @@ find_drop_of(_Config) ->
 
   {atomic, #flow_drop{id = 3}}
     = flow_database:find_drop_of(2),
+
+  ok.
+
+fetch_tree(_Config) ->
+  {atomic, #flow_drop{id = 1, children = [#flow_drop{id = 2, children = [#flow_drop{id = 4}]}, #flow_drop{id = 3}]}}
+    = flow_database:fetch_tree({flow, 1}),
+
+  {atomic, #flow_drop{id = 1, children = [#flow_drop{id = 2, children = [#flow_drop{id = 4}]}, #flow_drop{id = 3}]}}
+    = flow_database:fetch_tree({drop, 1}),
+
+  ok.
+
+sort_flows_by(_Config) ->
+  [1, 2] = flow_database:sort_flows_by(update, [1, 2]),
+  [2, 1] = flow_database:sort_flows_by(creation, [1, 2]),
+
+  ok.
+
+find_last_update(Config) ->
+  {_, Last} = ?config(times, Config),
+
+  Last = flow_database:find_last_update({flow, 1}),
 
   ok.
 
