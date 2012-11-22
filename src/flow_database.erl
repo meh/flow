@@ -292,10 +292,10 @@ in_expression(Flow, {'not', What}, Floats) ->
   not in_expression(Flow, What, Floats);
 
 in_expression(Flow, {'and', Left, Right}, Floats) ->
-  in_expression(Flow, Left, Floats) and in_expression(Flow, Right, Floats);
+  in_expression(Flow, Left, Floats) andalso in_expression(Flow, Right, Floats);
 
 in_expression(Flow, {'or', Left, Right}, Floats) ->
-  in_expression(Flow, Left, Floats) or in_expression(Flow, Right, Floats);
+  in_expression(Flow, Left, Floats) orelse in_expression(Flow, Right, Floats);
 
 in_expression(Flow, {'xor', Left, Right}, Floats) ->
   in_expression(Flow, Left, Floats) xor in_expression(Flow, Right, Floats);
