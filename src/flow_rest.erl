@@ -20,19 +20,10 @@
 
 -include("flow.hrl").
 -compile({no_auto_import, [get/1, get/0, put/2, error/1, error/2]}).
--export([start/0, start/1, stop/0]).
-
-start() ->
-  start(58008).
+-export([start/1]).
 
 start(Port) ->
-  mnesia:start(),
-  misultin:start_link([{port, Port}, {loop, fun handle/1}]),
-  flow_database:wait_for_tables().
-
-stop() ->
-  misultin:stop(),
-  mnesia:stop().
+  misultin:start_link([{port, Port}, {loop, fun handle/1}]).
 
 handle(Req) ->
   Resource = Req:resource([lowercase, urldecode]),
