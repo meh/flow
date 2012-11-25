@@ -80,10 +80,12 @@ get(_, _, Req) ->
   Req:respond(404, [{"Content-Type", "text/plain"}], "What is love?").
 
 post(["flow"], _, {obj, Data}, Req) ->
-  respond(flow_json:from_flow(flow_database:create_flow(
-        orddict:fetch("title", Data),
-        orddict:fetch("content", Data),
-        orddict:fetch("floats", Data))), Req);
+  {atomic, Flow} = flow_database:create_flow(
+      flow_json:to_string(proplists:get_value("title", Data)),
+      flow_json:to_string(proplists:get_value("content", Data)),
+      flow_json:to_string(proplists:get_value("floats", Data))),
+
+  respond(flow_json:from_flow(Flow), Req);
 
 post(_, _, _, Req) ->
   Req:respond(404, [{"Content-Type", "text/plain"}], "Baby don't hurt me.").
