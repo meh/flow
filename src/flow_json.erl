@@ -22,6 +22,7 @@
 
 -export([mime_type/0, encode/1, decode/1]).
 -export([from_string/1, from_datetime/1, from_drop/1, from_flow/1]).
+-export([to_string/1]).
 
 mime_type() ->
   rfc4627:mime_type().
@@ -59,3 +60,9 @@ from_flow(Flow) ->
       {title, from_string(Flow#flow_flow.title)},
       {floats, lists:map(fun from_string/1, Flow#flow_flow.floats)},
       {drop, from_drop(Flow#flow_flow.drop)}]}.
+
+to_string(Strings) when is_list(Strings) ->
+  lists:map(fun to_string/1, Strings);
+
+to_string(String) when is_binary(String) ->
+  binary_to_list(String).
