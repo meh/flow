@@ -60,10 +60,21 @@ get(["flow", Id], Query, Req) ->
       respond(flow_json:from_flow(Flow#flow_flow{drop = Drop}), Req)
   end;
 
-get(["flows", Expression], _, Req) ->
-  Flows = flow_database:find_flows(Expression),
+get(["flows", Expression], Query, Req) ->
+  {atomic, Flows} = flow_database:find_flows(Expression),
+  Sorted          = case Req:get_variable("by", Query) of
+    undefined  -> Flows;
+    "creation" -> flow_database:sort_flows_by(creation, Flows);
+    "update"   -> flow_database:sort_flows_by(update, Flows)
+  end,
 
-  respond(Flows, Req);
+  respond(case Req:get_variable("full", Query) of
+      undefined -> Sorted;
+      []        -> lists:map(fun(Id) ->
+              {atomic, Flow} = flow_database:find_flow(Id),
+              flow_json:from_flow(Flow)
+          end, Sorted)
+    end, Req);
 
 get(_, _, Req) ->
   Req:respond(404, [{"Content-Type", "text/plain"}], "What is love?").
