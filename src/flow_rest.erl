@@ -27,12 +27,16 @@ start(Port) ->
 
 handle(Req) ->
   Resource = Req:resource([lowercase, urldecode]),
+  Data     = case flow_json:decode(Req:get(body)) of
+    {ok, Value, []} -> Value;
+    {error, _}      -> null
+  end,
 
   case Req:get(method) of
     'GET'    -> get(Resource, Req:parse_qs(), Req);
-    'POST'   -> post(Resource, Req:parse_qs(), flow_json:decode(Req:get(body)), Req);
-    'PUT'    -> put(Resource, Req:parse_qs(), flow_json:decode(Req:get(body)), Req);
-    'DELETE' -> delete(Resource, Req:parse_qs(), flow_json:decode(Req:get(body)), Req)
+    'POST'   -> post(Resource, Req:parse_qs(), Data, Req);
+    'PUT'    -> put(Resource, Req:parse_qs(), Data, Req);
+    'DELETE' -> delete(Resource, Req:parse_qs(), Data, Req)
   end.
 
 get(["drop", Id], Query, Req) ->
