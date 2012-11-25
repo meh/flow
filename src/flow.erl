@@ -18,7 +18,27 @@
 -module(flow).
 -author('meh. <meh@schizofreni.co>').
 
--export([start/0, start/1]).
+-export([install/0, install/1, uninstall/0, start/0, start/1, stop/0]).
+
+install() ->
+  install([node()]).
+
+install(Nodes) ->
+  ok = application:start(mnesia),
+  flow_database:create(Nodes),
+  flow_database:wait_for_tables(),
+
+  stopped = application:stop(mnesia),
+
+  ok.
+
+uninstall() ->
+  ok = application:start(mnesia),
+  flow_database:delete(),
+
+  stopped = application:stop(mnesia),
+
+  ok.
 
 start() ->
   start(58008).
@@ -29,5 +49,11 @@ start(Port) ->
 
   ok = application:start(misultin),
   flow_rest:start(Port),
+
+  ok.
+
+stop() ->
+  stopped = application:stop(mnesia),
+  stopped = application:stop(misultin),
 
   ok.
