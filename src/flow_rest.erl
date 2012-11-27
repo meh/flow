@@ -77,7 +77,7 @@ get(["flows", Expression], Query, Req) ->
     end, Req);
 
 get(_, _, Req) ->
-  Req:respond(404, [{"Content-Type", "text/plain"}], "What is love?").
+  Req:respond(404, cross_domain([{"Content-Type", "text/plain"}]), "What is love?").
 
 post(["flow"], _, {obj, Data}, Req) ->
   {atomic, Flow} = flow_database:create_flow(
@@ -88,13 +88,25 @@ post(["flow"], _, {obj, Data}, Req) ->
   respond(flow_json:from_flow(Flow), Req);
 
 post(_, _, _, Req) ->
-  Req:respond(404, [{"Content-Type", "text/plain"}], "Baby don't hurt me.").
+  Req:respond(404, cross_domain([{"Content-Type", "text/plain"}]), "Baby don't hurt me.").
 
 put(_, _, _, Req) ->
-  Req:respond(404, [{"Content-Type", "text/plain"}], "Don't hurt me.").
+  Req:respond(404, cross_domain([{"Content-Type", "text/plain"}]), "Don't hurt me.").
 
 delete(_, _, _, Req) ->
-  Req:respond(404, [{"Content-Type", "text/plain"}], "No more.").
+  Req:respond(404, cross_domain([{"Content-Type", "text/plain"}]), "No more.").
 
 respond(Data, Req) ->
-  Req:ok([{"Content-Type", flow_json:mime_type()}], flow_json:encode(Data)).
+  Req:ok(cross_domain([{"Content-Type", flow_json:mime_type()}]), flow_json:encode(Data)).
+
+cross_domain(Headers) ->
+  case application:get_env(flow, domains) of
+    {ok, Domains} -> [
+        {"Access-Control-Expose-Headers",    "*"},
+        {"Access-Control-Allow-Credentials", "true"},
+        {"Access-Control-Allow-Origin",      string:join(Domains, ",")},
+        {"Access-Control-Allow-Methods",     string:join(Domains, ",")},
+        {"Access-Control-Allow-Headers",     string:join(Domains, ",")} | Headers];
+
+    _ -> Headers
+  end.
