@@ -28,7 +28,7 @@ install(Nodes) ->
   flow_database:create(Nodes),
   flow_database:wait_for_tables(),
 
-  stopped = application:stop(mnesia),
+  ok = application:stop(mnesia),
 
   ok.
 
@@ -36,7 +36,7 @@ uninstall() ->
   ok = application:start(mnesia),
   flow_database:delete(),
 
-  stopped = application:stop(mnesia),
+  ok = application:stop(mnesia),
 
   ok.
 
