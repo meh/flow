@@ -1,6 +1,7 @@
 deps/
 ebin/
 logs/
+priv/
 *.beam
 src/boolean_lexer.erl
 src/boolean_parser.erl
