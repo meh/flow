@@ -268,13 +268,13 @@ find_flows(Expression) ->
                         boolean_parser:elements(Expression), {{'$1', '$2'}}),
 
   case mnesia:transaction(fun() -> mnesia:select(flow_float, MatchSpec) end) of
-    {atomic, Floats} -> {atomic, filter_flows(Expression, orddict:from_list(Floats))};
+    {atomic, Floats} -> {atomic, filter_flows(Expression, Floats)};
     Error            -> Error
   end.
 
 filter_flows(Expression, Floats) ->
   {ok, ParsedExpression} = boolean_parser:expression(Expression),
-  Flows                  = lists:usort(orddict:fold(fun(_, Value, Acc) -> Value ++ Acc end, [], Floats)),
+  Flows                  = lists:usort(lists:foldl(fun({_, Value}, Acc) -> Value ++ Acc end, [], Floats)),
 
   filter_flows(ParsedExpression, Floats, Flows).
 
@@ -299,7 +299,10 @@ in_expression(Flow, {'xor', Left, Right}, Floats) ->
 
 % Term is a string, check if the Flow has that float
 in_expression(Flow, Term, Floats) when is_list(Term) ->
-  lists:member(Flow, orddict:fetch(Term, Floats)).
+  case lists:keyfind(Term, 1, Floats) of
+    false      -> false;
+    {_, Flows} -> lists:member(Flow, Flows)
+  end.
 
 find_drop_of(Id) when is_integer(Id) ->
   mnesia:transaction(fun() ->
