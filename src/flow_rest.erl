@@ -81,9 +81,9 @@ get(_, _, Req) ->
 
 post(["flow"], _, {obj, Data}, Req) ->
   {atomic, Flow} = flow_database:create_flow(
-      flow_json:to_string(proplists:get_value("title", Data)),
-      flow_json:to_string(proplists:get_value("content", Data)),
-      flow_json:to_string(proplists:get_value("floats", Data))),
+      flow_json:to_string(Req:get_variable("title", Data)),
+      flow_json:to_string(Req:get_variable("content", Data)),
+      flow_json:to_string(Req:get_variable("floats", Data))),
 
   respond(flow_json:from_flow(Flow), Req);
 
