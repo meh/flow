@@ -77,7 +77,7 @@ get(["flows", Expression], Query, Req) ->
     end, Req);
 
 get(_, _, Req) ->
-  Req:respond(404, cross_domain([{"Content-Type", "text/plain"}]), "What is love?").
+  not_found("What is love?", Req).
 
 post(["flow"], _, {obj, Data}, Req) ->
   {atomic, Flow} = flow_database:create_flow(
@@ -88,25 +88,28 @@ post(["flow"], _, {obj, Data}, Req) ->
   respond(flow_json:from_flow(Flow), Req);
 
 post(_, _, _, Req) ->
-  Req:respond(404, cross_domain([{"Content-Type", "text/plain"}]), "Baby don't hurt me.").
+  not_found("Baby don't hurt me.", Req).
 
 put(_, _, _, Req) ->
-  Req:respond(404, cross_domain([{"Content-Type", "text/plain"}]), "Don't hurt me.").
+  not_found("Don't hurt me.", Req).
 
 delete(_, _, _, Req) ->
-  Req:respond(404, cross_domain([{"Content-Type", "text/plain"}]), "No more.").
+  not_found("No more.", Req).
 
 respond(Data, Req) ->
   Req:ok(cross_domain([{"Content-Type", flow_json:mime_type()}]), flow_json:encode(Data)).
 
+not_found(Reason, Req) ->
+  Req:respond(404, cross_domain([{"Content-Type", "text/plain"}]), Reason).
+
 cross_domain(Headers) ->
   case application:get_env(flow, domains) of
     {ok, Domains} -> [
-        {"Access-Control-Expose-Headers",    "*"},
+        {"Access-Control-Expose-Headers", "*"},
         {"Access-Control-Allow-Credentials", "true"},
-        {"Access-Control-Allow-Origin",      string:join(Domains, ",")},
-        {"Access-Control-Allow-Methods",     string:join(Domains, ",")},
-        {"Access-Control-Allow-Headers",     string:join(Domains, ",")} | Headers];
+        {"Access-Control-Allow-Origin", string:join(Domains, ",")},
+        {"Access-Control-Allow-Methods", string:join(Domains, ",")},
+        {"Access-Control-Allow-Headers", string:join(Domains, ",")} | Headers];
 
     _ -> Headers
   end.
