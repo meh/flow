@@ -25,13 +25,13 @@ init_per_suite(Config) ->
 
 end_per_suite(_Config) ->
   ok = flow_database:delete(),
-  stopped = mnesia:stop(),
+  ok = application:stop(mnesia),
   mnesia:delete_schema([node()]),
 
   ok.
 
 start(Config) ->
-  ok = flow_database:create(),
+  ok = flow_database:create([node()]),
   flow_database:wait_for_tables(),
 
   Config.
