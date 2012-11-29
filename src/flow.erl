@@ -46,14 +46,11 @@ start() ->
 start(Port) ->
   ok = application:start(mnesia),
   flow_database:wait_for_tables(),
-
-  ok = application:start(misultin),
   flow_rest:start(Port),
 
   ok.
 
 stop() ->
   stopped = application:stop(mnesia),
-  stopped = application:stop(misultin),
 
   ok.
