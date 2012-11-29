@@ -14,7 +14,7 @@
     kernel,
     stdlib,
     mnesia,
-    misultin,
+    brokeback,
     rfc4627_jsonrpc
   ]}
 ]}.
